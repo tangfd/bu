@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpConnectionManager;
 import org.apache.commons.httpclient.NameValuePair;
@@ -44,8 +45,28 @@ public class HttpUtils {
         return getMethod.getResponseBodyAsStream();
     }
 
+    public static InputStream doGetAsStream(String url, Map<String, String> header) throws IOException {
+        GetMethod getMethod = new GetMethod(url);
+        if (MapUtils.isNotEmpty(header)) {
+            for (Map.Entry<String, String> entry : header.entrySet()) {
+                getMethod.addRequestHeader(entry.getKey(), entry.getValue());
+            }
+        }
+
+        HttpMethodParams methodParams = getMethod.getParams();
+        methodParams.setParameter(HttpMethodParams.SO_TIMEOUT, 30 * 1000);
+        httpClient.executeMethod(getMethod);
+
+        return getMethod.getResponseBodyAsStream();
+    }
+
     public static String doGetAsString(String url) throws IOException {
         InputStream inputStream = doGetAsStream(url);
+        return getString(inputStream);
+    }
+
+    public static String doGetAsString(String url, Map<String, String> header) throws IOException {
+        InputStream inputStream = doGetAsStream(url, header);
         return getString(inputStream);
     }
 
@@ -75,8 +96,35 @@ public class HttpUtils {
         return postMethod.getResponseBodyAsStream();
     }
 
+    public static InputStream doPostAsStream(String url, Map<String, String> params, Map<String, String> header) throws IOException {
+        PostMethod postMethod = new PostMethod(url);
+        if (MapUtils.isNotEmpty(header)) {
+            for (Map.Entry<String, String> entry : header.entrySet()) {
+                postMethod.addRequestHeader(entry.getKey(), entry.getValue());
+            }
+        }
+
+        NameValuePair[] param = new NameValuePair[params.size()];
+        int index = 0;
+        for (Map.Entry<String, String> entry : params.entrySet()) {
+            param[index++] = new NameValuePair(entry.getKey(), entry.getValue());
+        }
+
+        postMethod.setRequestBody(param);
+        HttpMethodParams methodParams = postMethod.getParams();
+        methodParams.setParameter(HttpMethodParams.SO_TIMEOUT, 30 * 1000);
+        httpClient.executeMethod(postMethod);
+
+        return postMethod.getResponseBodyAsStream();
+    }
+
     public static String doPostAsString(String url, Map<String, String> params) throws IOException {
         InputStream inputStream = doPostAsStream(url, params);
+        return getString(inputStream);
+    }
+
+    public static String doPostAsString(String url, Map<String, String> params, Map<String, String> header) throws IOException {
+        InputStream inputStream = doPostAsStream(url, params, header);
         return getString(inputStream);
     }
 
