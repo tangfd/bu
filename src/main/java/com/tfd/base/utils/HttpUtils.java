@@ -65,6 +65,14 @@ public class HttpUtils {
         return getString(inputStream);
     }
 
+    public static String doGetBodyAsString(String url) throws IOException {
+        GetMethod getMethod = new GetMethod(url);
+        HttpMethodParams methodParams = getMethod.getParams();
+        methodParams.setParameter(HttpMethodParams.SO_TIMEOUT, 30 * 1000);
+        getHttpClient().executeMethod(getMethod);
+        return getMethod.getResponseBodyAsString();
+    }
+
     public static String doGetAsString(String url, Map<String, String> header) throws IOException {
         InputStream inputStream = doGetAsStream(url, header);
         return getString(inputStream);
@@ -121,6 +129,21 @@ public class HttpUtils {
     public static String doPostAsString(String url, Map<String, String> params) throws IOException {
         InputStream inputStream = doPostAsStream(url, params);
         return getString(inputStream);
+    }
+
+    public static String doPostBodyAsString(String url, Map<String, String> params) throws IOException {
+        PostMethod postMethod = new PostMethod(url);
+        NameValuePair[] param = new NameValuePair[params.size()];
+        int index = 0;
+        for (Map.Entry<String, String> entry : params.entrySet()) {
+            param[index++] = new NameValuePair(entry.getKey(), entry.getValue());
+        }
+
+        postMethod.setRequestBody(param);
+        HttpMethodParams methodParams = postMethod.getParams();
+        methodParams.setParameter(HttpMethodParams.SO_TIMEOUT, 30 * 1000);
+        getHttpClient().executeMethod(postMethod);
+        return postMethod.getResponseBodyAsString();
     }
 
     public static String doPostAsString(String url, Map<String, String> params, Map<String, String> header) throws IOException {
