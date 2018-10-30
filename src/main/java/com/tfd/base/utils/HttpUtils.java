@@ -25,22 +25,22 @@ import java.util.Map;
  * @author TangFD@HF 2018/8/30
  */
 public class HttpUtils {
-    private static HttpClient httpClient;
     public static final Gson GSON = new Gson();
 
-    static {
-        httpClient = new HttpClient();
+    public static HttpClient getHttpClient() {
+        HttpClient httpClient = new HttpClient();
         HttpConnectionManager connectionManager = httpClient.getHttpConnectionManager();
         HttpConnectionManagerParams connectionManagerParams = connectionManager.getParams();
         connectionManagerParams.setConnectionTimeout(60 * 1000);
         connectionManagerParams.setSoTimeout(120 * 1000);
+        return httpClient;
     }
 
     public static InputStream doGetAsStream(String url) throws IOException {
         GetMethod getMethod = new GetMethod(url);
         HttpMethodParams methodParams = getMethod.getParams();
         methodParams.setParameter(HttpMethodParams.SO_TIMEOUT, 30 * 1000);
-        httpClient.executeMethod(getMethod);
+        getHttpClient().executeMethod(getMethod);
 
         return getMethod.getResponseBodyAsStream();
     }
@@ -55,7 +55,7 @@ public class HttpUtils {
 
         HttpMethodParams methodParams = getMethod.getParams();
         methodParams.setParameter(HttpMethodParams.SO_TIMEOUT, 30 * 1000);
-        httpClient.executeMethod(getMethod);
+        getHttpClient().executeMethod(getMethod);
 
         return getMethod.getResponseBodyAsStream();
     }
@@ -91,7 +91,7 @@ public class HttpUtils {
         postMethod.setRequestBody(param);
         HttpMethodParams methodParams = postMethod.getParams();
         methodParams.setParameter(HttpMethodParams.SO_TIMEOUT, 30 * 1000);
-        httpClient.executeMethod(postMethod);
+        getHttpClient().executeMethod(postMethod);
 
         return postMethod.getResponseBodyAsStream();
     }
@@ -113,7 +113,7 @@ public class HttpUtils {
         postMethod.setRequestBody(param);
         HttpMethodParams methodParams = postMethod.getParams();
         methodParams.setParameter(HttpMethodParams.SO_TIMEOUT, 30 * 1000);
-        httpClient.executeMethod(postMethod);
+        getHttpClient().executeMethod(postMethod);
 
         return postMethod.getResponseBodyAsStream();
     }
@@ -144,7 +144,7 @@ public class HttpUtils {
         postMethod.setRequestEntity(requestEntity);
         HttpMethodParams methodParams = postMethod.getParams();
         methodParams.setParameter(HttpMethodParams.SO_TIMEOUT, 30 * 1000);
-        httpClient.executeMethod(postMethod);
+        getHttpClient().executeMethod(postMethod);
 
         return postMethod.getResponseBodyAsStream();
     }
@@ -155,7 +155,7 @@ public class HttpUtils {
         postMethod.setRequestEntity(requestEntity);
         HttpMethodParams methodParams = postMethod.getParams();
         methodParams.setParameter(HttpMethodParams.SO_TIMEOUT, 30 * 1000);
-        httpClient.executeMethod(postMethod);
+        getHttpClient().executeMethod(postMethod);
 
         return getString(postMethod.getResponseBodyAsStream());
     }
