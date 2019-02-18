@@ -14,6 +14,7 @@ import org.apache.commons.httpclient.methods.RequestEntity;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
 import org.apache.commons.httpclient.params.HttpMethodParams;
+import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -80,7 +81,7 @@ public class HttpUtils {
 
     public static <T> T doGetAsObject(String url, Class<T> clazz) throws IOException {
         String string = doGetAsString(url);
-        return GSON.fromJson(string, clazz);
+        return GSON.fromJson(string.trim(), clazz);
     }
 
     public static JsonObject doGetAsJson(String url) throws IOException {
@@ -153,7 +154,7 @@ public class HttpUtils {
 
     public static <T> T doPostAsObject(String url, Map<String, String> params, Class<T> clazz) throws IOException {
         String string = doPostAsString(url, params);
-        return GSON.fromJson(string, clazz);
+        return GSON.fromJson(string.trim(), clazz);
     }
 
     public static JsonObject doPostAsJson(String url, Map<String, String> params) throws IOException {
@@ -185,7 +186,7 @@ public class HttpUtils {
 
     public static <T> T doPostByBodyAsObject(String url, String bodyParam, Class<T> clazz) throws IOException {
         String string = doPostByBodyAsString(url, bodyParam);
-        return GSON.fromJson(string, clazz);
+        return GSON.fromJson(string.trim(), clazz);
     }
 
     public static JsonObject doPostByBodyAsJson(String url, String bodyParam) throws IOException {
@@ -201,11 +202,18 @@ public class HttpUtils {
 
     private static String getString(InputStream inputStream) {
         try {
-            byte[] data = new byte[inputStream.available()];
-            inputStream.read(data);
-            return new String(data, "UTF-8");
+            byte[] data = new byte[1024 * 4];
+            StringBuilder content = new StringBuilder();
+            int read;
+            while ((read = inputStream.read(data)) != -1) {
+                content.append(new String(data, 0, read, "UTF-8"));
+            }
+
+            return content.toString();
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            IOUtils.closeQuietly(inputStream);
         }
 
         return null;
